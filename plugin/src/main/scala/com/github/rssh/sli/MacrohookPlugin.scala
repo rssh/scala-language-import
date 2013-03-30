@@ -32,8 +32,8 @@ class MacrohookPlugin(val global: Global) extends Plugin
    class HookInserter(unit: CompilationUnit) extends Transformer
    {
   
-    def macroHookAnnotationTree = genSelectRootType("com","github","rssh","sli","MacrohookA")
-    def macroHooktionTree = genSelectRootType("com","github","rssh","sli","MacrohookA")
+    lazy val macroHookAnnotationTree = genSelectRootType("com","github","rssh","sli","MacrohookA")
+    lazy val macroHookFunctionTree = genSelectRootType("com","github","rssh","sli","MacrohookF")
     
     def preTransform(tree: Tree):Tree =
     {
