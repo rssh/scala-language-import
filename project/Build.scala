@@ -15,7 +15,7 @@ object SliBuild extends Build
                              settings=pluginSettings)
 
    lazy val runtime = Project(id="runtime",
-                             base=file("plugin"),
+                             base=file("runtime"),
                              settings=runtimeSettings)
 
    lazy val example = Project(id="example",
@@ -43,7 +43,7 @@ object SliBuild extends Build
                              )
  
    lazy val exampleSettings = Project.defaultSettings ++ commonSettings ++ Seq(
-                               name := "sli-runtime"
+                               name := "sli-example"
                              )
 
 }
