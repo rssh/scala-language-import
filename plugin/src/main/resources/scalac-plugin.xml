@@ -1,0 +1,4 @@
+<plugin>
+  <name>macrohook</name>
+  <classname>com.github.rssh.sli.MacrohookPlugin</classname>
+</plugin>
