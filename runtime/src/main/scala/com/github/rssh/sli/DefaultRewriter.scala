@@ -15,5 +15,3 @@ trait DefaultRewriter
   def transformAImpl(c: AnnotationContext): c.Tree = c.annottee
 
 }
-
-
