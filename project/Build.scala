@@ -7,7 +7,7 @@ object SliBuild extends Build
 
    lazy val root = Project(id="sli",
                            base=file(".")
-                          ).aggregate("plugin","runtime","example")
+                          ).aggregate("plugin","runtime","example-library", "example-application")
 
 
    lazy val plugin = Project(id="plugin",
@@ -18,9 +18,14 @@ object SliBuild extends Build
                              base=file("runtime"),
                              settings=runtimeSettings)
 
-   lazy val example = Project(id="example",
-                              base=file("example"),
-                              settings=exampleSettings) dependsOn (plugin, runtime)
+   lazy val exampleLibrary = Project(id="example-library",
+                              base=file("example/library"),
+                              settings=exampleLibrarySettings) dependsOn (plugin, runtime)
+
+   lazy val exampleApplication = Project(id="example-application",
+                              base=file("example/application"),
+                              settings=exampleApplicationSettings) dependsOn (plugin, runtime, exampleLibrary)
+
 
    lazy val commonSettings = Seq(
         organization:="org.github.rssh",
@@ -42,8 +47,19 @@ object SliBuild extends Build
                                name := "sli-runtime"
                              )
  
-   lazy val exampleSettings = Project.defaultSettings ++ commonSettings ++ Seq(
-                               name := "sli-example"
+   lazy val exampleLibrarySettings = Project.defaultSettings ++ commonSettings ++ Seq(
+                               name := "sli-example-library"
                              )
+
+   lazy val exampleApplicationSettings = Project.defaultSettings ++ commonSettings ++ Seq(
+                               name := "sli-example-application",
+                               autoCompilerPlugins := true,
+                               addCompilerPlugin("org.github.rssh" %% "sli-plugin" % "0.0.1-SNAPSHOT"),
+                               scalacOptions += "-Xplugin:plugin/target/scala-2.11/sli-plugin_2.11-0.0.1-SNAPSHOT.jar",
+                               scalacOptions += "-Xprint:macrohook",
+                               scalacOptions += "-Ydebug",
+                               scalacOptions += "-Yshow-trees"
+                             )
+
 
 }

@@ -10,8 +10,7 @@ class MacrohookPlugin(val global: Global) extends Plugin
 
 
  val name="macrohook"
- val description = "insert macro hooks for ast transformation in imports"
-
+ val description = "insert macro hooks for ast transformation driven by default transformers in imports"
 
  val components = List[PluginComponent](HookInsertComponent)
 
@@ -28,24 +27,28 @@ class MacrohookPlugin(val global: Global) extends Plugin
 
    protected def newTransformer(unit: CompilationUnit) = new HookInserter(unit)
 
-
-   class HookInserter(unit: CompilationUnit) extends Transformer
+   class HookInserter(unit: CompilationUnit) extends Transformer with TypingTransformers
    {
   
     lazy val macroHookAnnotationTree = genSelectRootType("com","github","rssh","sli","MacrohookA")
     lazy val macroHookFunctionTree = genSelectRootType("com","github","rssh","sli","MacrohookF")
-    
-    def preTransform(tree: Tree):Tree =
-    {
-     tree match {
-       case ClassDef(mods, name, tparams, impl) => Annotated( macroHookAnnotationTree, tree )
-       case ModuleDef(mods, name, impl) => Annotated( macroHookAnnotationTree, tree )
-     }
-    }
+
+    val global = MacrohookPlugin.this.global
 
     override def transform(tree: Tree): Tree = {
-      val t = preTransform(tree)
-      super.transform(tree)
+     def insertAnnotation(m: Modifiers) = m match {
+        case Modifiers(flags,name,old) => 
+               Modifiers(flags,name,New(macroHookAnnotationTree,List())::old) 
+     }
+     tree match {
+       case ClassDef(mods, name, tparams, impl) => 
+             treeCopy.ClassDef(tree, insertAnnotation(mods), 
+                                    name, tparams, transformTemplate(impl))
+       case ModuleDef(mods, name, impl) => 
+             treeCopy.ModuleDef(tree, insertAnnotation(mods), 
+                                      name, transformTemplate(impl) )
+       case _ => super.transform(tree)
+     }
     }
 
     private def genSelectRootType(names: String*): Tree =
@@ -59,6 +62,7 @@ class MacrohookPlugin(val global: Global) extends Plugin
      }
 
    }
+
 
  } 
 
