@@ -1,6 +1,6 @@
 package go
 
-package object deffered
+package object defer
 {
   import language.experimental.macros
   import scala.annotation.MacroAnnotation
@@ -20,8 +20,8 @@ package object deffered
 
     override def transformFImpl(c:Context)(x: c.Tree): c.Tree =
     {
-      if (findDeffered(c)(x)) {
-         withDeffered(c)(x)
+      if (findDefer(c)(x)) {
+         withDefer(c)(x)
       } else {
        x
       }
@@ -44,14 +44,14 @@ package object deffered
                ModuleDef(mods,name, 
                          Template(parents, self, body map (transformDef(c)(_))))
        case DefDef(mods, name, tparam, vparams, tpt, rhs) =>
-         if (findDeffered(c)(rhs)) {
-             DefDef(mods, name, tparam, vparams, tpt, withDeffered(c)(rhs))
+         if (findDefer(c)(rhs)) {
+             DefDef(mods, name, tparam, vparams, tpt, withDefer(c)(rhs))
          } else {
              x
          }
        case ValDef(mods, name, tpt, rhs) =>
-         if (findDeffered(c)(rhs)) {
-            ValDef(mods, name, tpt, withDeffered(c)(rhs))
+         if (findDefer(c)(rhs)) {
+            ValDef(mods, name, tpt, withDefer(c)(rhs))
          } else {
             x
          }
@@ -59,14 +59,14 @@ package object deffered
     }
 
 
-    def withDeffered(c:Context)(x: c.Tree): c.Tree =
+    def withDefer(c:Context)(x: c.Tree): c.Tree =
     {
      import c.universe._
      // TODO
      //   1. use fresh names.
      //   2. foreach must be in library [and think about suppressed exceptions ]
      Block(List(q"""val __d=collection.mutable.ArrayBuffer[()=>Any]()""",
-               q"""@inline def deffered(x: =>Any) = __d+=(()=>x)"""
+               q"""@inline def defer(x: =>Any) = __d+=(()=>x)"""
               ),
           Try(
             x,
@@ -76,13 +76,13 @@ package object deffered
          )
     } 
 
-    def findDefferedInList(c:Context)(x: List[c.Tree]): Boolean = 
-      x.find(findDeffered(c)).isDefined
+    def findDeferInList(c:Context)(x: List[c.Tree]): Boolean = 
+      x.find(findDefer(c)).isDefined
 
-    def findDeffered(c:Context)(x: c.Tree): Boolean = 
+    def findDefer(c:Context)(x: c.Tree): Boolean = 
     {
-      @inline def find(t: c.Tree) = findDeffered(c)(t)
-      @inline def findl(l: List[c.Tree]) = findDefferedInList(c)(l)
+      @inline def find(t: c.Tree) = findDefer(c)(t)
+      @inline def findl(l: List[c.Tree]) = findDeferInList(c)(l)
    
       import c.universe._
       x match {
@@ -105,7 +105,7 @@ package object deffered
         case Typed(expr, tpt) => find(expr)
         case Apply(fun, args) =>
             fun match {
-              case Ident(TermName("deffered")) => true
+              case Ident(TermName("defer")) => true
               case _ => find(fun) || findl(args)
             }
         case Select(qualifier, name) => find(qualifier)
