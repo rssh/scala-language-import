@@ -18,20 +18,9 @@ package object defer
       transformDef(c)(c.annottee)
     }
 
-    override def transformFImpl(c:Context)(x: c.Tree): c.Tree =
-    {
-      if (findDefer(c)(x)) {
-         withDefer(c)(x)
-      } else {
-       x
-      }
-    }
-
-
     def transformDef(c:Context)(x: c.Tree): c.Tree =
     {
       import c.universe._
-      //System.err.println("raw, x="+showRaw(x))
       x match {
        case ClassDef(mods,name,tparams,
                          Template(parents,self,body)) => 

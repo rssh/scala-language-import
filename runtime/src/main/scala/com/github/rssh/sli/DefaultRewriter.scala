@@ -10,8 +10,6 @@ import scala.reflect.api._
 trait DefaultRewriter
 {
 
-  def transformFImpl(c: Context)(t: c.Tree): c.Tree
-
   def transformAImpl(c: AnnotationContext): c.Tree = c.annottee
 
 }
