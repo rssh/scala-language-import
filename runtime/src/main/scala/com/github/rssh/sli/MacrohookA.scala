@@ -20,12 +20,13 @@ object MacrohookA
 
   def transformImpl(c:AnnotationContext): c.Tree =
   {
-    System.err.println("MacrohookA annotation, annottee="+c.annottee.toString);
     import c.universe._
     val t = c.annottee
+    // TODO: may-be find all implicit of this type and apply sequentially
+    //   or build combination.
     c.inferImplicitValue(typeOf[DefaultRewriter]) match {
        case EmptyTree =>
-               System.err.println("macro processor not found")
+               //System.err.println("macro processor not found")
                t
        case p@_ =>
                val pe = c.Expr[DefaultRewriter](c.resetAllAttrs(p))

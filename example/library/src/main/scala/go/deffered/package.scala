@@ -1,6 +1,5 @@
 package go
 
-
 package object deffered
 {
   import language.experimental.macros
@@ -16,13 +15,11 @@ package object deffered
 
     override def transformAImpl(c:AnnotationContext): c.Tree =
     {
-      System.err.println("Go.annotationImpl")
       transformDef(c)(c.annottee)
     }
 
     override def transformFImpl(c:Context)(x: c.Tree): c.Tree =
     {
-      System.err.println("in Go.transformImpl, x="+x);
       if (findDeffered(c)(x)) {
          withDeffered(c)(x)
       } else {
@@ -34,7 +31,7 @@ package object deffered
     def transformDef(c:Context)(x: c.Tree): c.Tree =
     {
       import c.universe._
-      System.err.println("raw, x="+showRaw(x))
+      //System.err.println("raw, x="+showRaw(x))
       x match {
        case ClassDef(mods,name,tparams,
                          Template(parents,self,body)) => 
@@ -65,6 +62,9 @@ package object deffered
     def withDeffered(c:Context)(x: c.Tree): c.Tree =
     {
      import c.universe._
+     // TODO
+     //   1. use fresh names.
+     //   2. foreach must be in library [and think about suppressed exceptions ]
      Block(List(q"""val __d=collection.mutable.ArrayBuffer[()=>Any]()""",
                q"""@inline def deffered(x: =>Any) = __d+=(()=>x)"""
               ),
